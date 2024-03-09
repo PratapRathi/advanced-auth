@@ -2,7 +2,7 @@
 import React, { useState, useTransition } from 'react';
 import { CardWrapper } from '@/components/auth/card-wrapper';
 import * as z from "zod";
-import { LoginSchema } from '@/schemas/index';
+import { RegisterSchema } from '@/schemas/index';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '@/components/ui/input';
@@ -10,26 +10,27 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Button } from '@/components/ui/button'
 import { FormSuccess } from '@/components/form-success';
 import { FormError } from '@/components/form-error';
-import { login } from '@/actions/login';
+import { register } from '@/actions/register';
 
-export const LoginForm = () => {
+export const RegisterForm = () => {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition();
-    const form = useForm<z.infer<typeof LoginSchema>>({
-        resolver: zodResolver(LoginSchema),
+    const form = useForm<z.infer<typeof RegisterSchema>>({
+        resolver: zodResolver(RegisterSchema),
         defaultValues: {
             email: "",
-            password: ""
+            password: "",
+            name: ""
         }
     });
 
-    const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+    const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
         setError("");
         setSuccess("");
 
         startTransition(() => {
-            login(values).then((data) => {
+            register(values).then((data) => {
                 setError(data?.error);
                 setSuccess(data?.success);
             })
@@ -37,10 +38,19 @@ export const LoginForm = () => {
     }
 
     return (
-        <CardWrapper headerLabel='Welcome Back' backButtonLabel="Don't have an account" backButtonHref='/auth/register' showSocial >
+        <CardWrapper headerLabel='Create an Account' backButtonLabel="Already have an account?" backButtonHref='/auth/login' showSocial >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
                     <div className="space-y-4">
+                        <FormField control={form.control} name='name' render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                    <Input disabled={isPending} {...field} placeholder='John Doe' />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                         <FormField control={form.control} name='email' render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Email</FormLabel>
@@ -62,7 +72,7 @@ export const LoginForm = () => {
                     </div>
                     <FormSuccess message={success} />
                     <FormError message={error} />
-                    <Button disabled={isPending} className='w-full' type='submit'>Login</Button>
+                    <Button disabled={isPending} className='w-full' type='submit'>Create an account</Button>
                 </form>
             </Form>
         </CardWrapper>
